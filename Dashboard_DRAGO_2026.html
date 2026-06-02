@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRAGO · Dashboard Comercial B2B 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#eef1f7; --panel:#ffffff; --ink:#0f172a; --muted:#64748b; --line:#e2e8f0;
+  --primary:#4f46e5; --primary-soft:#eef2ff; --accent:#0ea5e9; --teal:#14b8a6;
+  --green:#16a34a; --green-soft:#dcfce7; --amber:#f59e0b; --amber-soft:#fef3c7;
+  --red:#dc2626; --red-soft:#fee2e2; --navy:#0b1736;
+  --shadow:0 1px 2px rgba(16,24,40,.04),0 8px 24px rgba(16,24,40,.06);
+  --radius:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.45}
+.wrap{max-width:1320px;margin:0 auto;padding:22px 22px 80px}
+/* HEADER */
+.topbar{background:linear-gradient(120deg,#0b1736 0%,#1e2a55 55%,#3730a3 100%);color:#fff;border-radius:20px;padding:22px 26px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.topbar::after{content:"";position:absolute;right:-60px;top:-60px;width:240px;height:240px;background:radial-gradient(circle,rgba(99,102,241,.35),transparent 70%)}
+.topbar h1{font-size:24px;font-weight:700;letter-spacing:.3px;display:flex;align-items:center;gap:12px}
+.logo{width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,#6366f1,#0ea5e9);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;box-shadow:0 4px 14px rgba(14,165,233,.5)}
+.topbar p{color:#c7d2fe;margin-top:6px;font-size:13px;max-width:760px}
+.topbar .meta{margin-top:12px;display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:#a5b4fc}
+.topbar .meta b{color:#fff}
+/* FILTERS */
+.filters{background:var(--panel);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px 18px;margin-top:18px;display:grid;grid-template-columns:auto auto 1fr auto;gap:18px;align-items:start}
+.fgroup{display:flex;flex-direction:column;gap:7px;min-width:0}
+.flabel{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:999px;padding:6px 13px;font-size:12.5px;cursor:pointer;font-weight:600;transition:.15s;user-select:none}
+.chip:hover{border-color:var(--primary)}
+.chip.on{background:var(--primary);border-color:var(--primary);color:#fff;box-shadow:0 3px 10px rgba(79,70,229,.35)}
+.chip.year{background:var(--navy);border-color:var(--navy);color:#fff;cursor:default}
+.cust-box{position:relative}
+.cust-btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 13px;font-size:13px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:8px;justify-content:space-between;min-width:230px}
+.cust-btn .cnt{background:var(--primary-soft);color:var(--primary);border-radius:7px;padding:1px 8px;font-size:11.5px}
+.cust-panel{display:none;position:absolute;z-index:40;top:46px;left:0;width:330px;max-height:340px;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 18px 40px rgba(16,24,40,.18);padding:8px}
+.cust-panel.open{display:block}
+.cust-search{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;margin-bottom:6px}
+.cust-item{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:8px;cursor:pointer;font-size:13px}
+.cust-item:hover{background:var(--primary-soft)}
+.cust-item input{accent-color:var(--primary);width:15px;height:15px}
+.cust-item .amt{margin-left:auto;color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
+.btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 15px;font-size:13px;font-weight:700;cursor:pointer;transition:.15s;white-space:nowrap}
+.btn:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+.btn-ghost{color:var(--muted)}
+/* SECTIONS */
+.sec-title{display:flex;align-items:center;gap:11px;margin:30px 2px 14px}
+.sec-title .bar{width:5px;height:22px;border-radius:4px;background:linear-gradient(180deg,var(--primary),var(--accent))}
+.sec-title h2{font-size:17px;font-weight:700}
+.sec-title span{color:var(--muted);font-size:12.5px;font-weight:500}
+/* KPI CARDS */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.kpi{background:var(--panel);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px 17px;position:relative;overflow:hidden;border:1px solid #eef1f6}
+.kpi .lab{font-size:11.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px;display:flex;align-items:center;gap:7px}
+.kpi .val{font-size:25px;font-weight:800;margin-top:9px;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+.kpi .sub{font-size:12px;color:var(--muted);margin-top:5px}
+.kpi .pill{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;border-radius:999px;padding:2px 9px;margin-top:8px}
+.up{background:var(--green-soft);color:var(--green)} .down{background:var(--red-soft);color:var(--red)} .flat{background:#f1f5f9;color:var(--muted)}
+.kpi .ic{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;position:absolute;right:15px;top:15px}
+.mini{height:6px;border-radius:99px;background:#eef1f6;margin-top:11px;overflow:hidden}
+.mini i{display:block;height:100%;border-radius:99px}
+/* GOALS */
+.goals{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.goal{background:var(--panel);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;border:1px solid #eef1f6}
+.goal .gh{display:flex;justify-content:space-between;align-items:center}
+.goal .gh .name{font-weight:700;font-size:14px}
+.goal .gh .tag{font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px}
+.gauge{display:flex;align-items:center;gap:16px;margin-top:14px}
+.ring{position:relative;width:96px;height:96px;flex:none}
+.ring svg{transform:rotate(-90deg)}
+.ring .pc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring .pc b{font-size:19px;font-weight:800}
+.ring .pc small{font-size:10px;color:var(--muted)}
+.goal .gdet{font-size:12.5px;color:var(--muted);line-height:1.7}
+.goal .gdet b{color:var(--ink)}
+.sem{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}
+/* GRID PANELS */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:1.6fr 1fr;gap:14px}
+.card{background:var(--panel);border-radius:var(--radius);box-shadow:var(--shadow);padding:17px 18px;border:1px solid #eef1f6}
+.card h3{font-size:14px;font-weight:700;margin-bottom:3px;display:flex;justify-content:space-between;align-items:center}
+.card .hint{font-size:11.5px;color:var(--muted);font-weight:500}
+.chart-box{position:relative;height:280px;margin-top:12px}
+.chart-sm{height:240px}
+/* COMPARATOR */
+.cmp-bar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 4px}
+.cmp-out{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:8px}
+.cmp-cell{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.cmp-cell .l{font-size:11.5px;color:var(--muted);font-weight:600}
+.cmp-cell .v{font-size:18px;font-weight:800;margin-top:3px;font-variant-numeric:tabular-nums}
+/* TABLE */
+.tbl-wrap{margin-top:10px;overflow:auto;max-height:430px;border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{position:sticky;top:0;background:#f8fafc;text-align:right;padding:11px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);border-bottom:1px solid var(--line);cursor:pointer;white-space:nowrap;z-index:2}
+thead th:first-child,thead th:nth-child(2){text-align:left}
+thead th:hover{color:var(--primary)}
+tbody td{padding:10px 12px;text-align:right;border-bottom:1px solid #f1f5f9;font-variant-numeric:tabular-nums;white-space:nowrap}
+tbody td:first-child,tbody td:nth-child(2){text-align:left}
+tbody tr:hover{background:var(--primary-soft)}
+.rank-badge{display:inline-flex;width:24px;height:24px;border-radius:7px;background:#f1f5f9;color:var(--muted);font-weight:800;align-items:center;justify-content:center;font-size:11.5px}
+.rank-badge.gold{background:#fef9c3;color:#a16207}.rank-badge.silver{background:#f1f5f9;color:#475569}.rank-badge.bronze{background:#ffedd5;color:#c2410c}
+.cust-name{font-weight:600;max-width:240px;overflow:hidden;text-overflow:ellipsis}
+.share-bar{display:inline-block;height:7px;border-radius:99px;background:var(--primary);vertical-align:middle;margin-right:7px;min-width:3px}
+.g-up{color:var(--green);font-weight:700}.g-down{color:var(--red);font-weight:700}.g-new{color:var(--accent);font-weight:700}
+/* HEATMAP */
+.heat{margin-top:12px;overflow:auto}
+.heat table{font-size:12px}
+.heat td,.heat th{text-align:center;padding:7px 6px;border:1px solid #fff}
+.heat th{background:transparent;color:var(--muted);font-size:11px;position:static}
+.heat td.name{text-align:left;font-weight:600;background:#fff;border:none;max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.heat td.cell{color:#0f172a;font-weight:600;border-radius:6px;font-variant-numeric:tabular-nums}
+/* SEGMENTS */
+.segs{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.seg{background:var(--panel);border-radius:var(--radius);box-shadow:var(--shadow);padding:15px;border:1px solid #eef1f6;border-top:4px solid var(--primary)}
+.seg .n{font-size:30px;font-weight:800;line-height:1}
+.seg .t{font-weight:700;font-size:13px;margin-top:6px}
+.seg .d{font-size:11.5px;color:var(--muted);margin-top:4px;min-height:30px}
+.seg .who{font-size:11px;color:var(--primary);margin-top:7px;font-weight:600;max-height:46px;overflow:hidden}
+/* INSIGHTS */
+.insights{display:grid;grid-template-columns:repeat(2,1fr);gap:13px}
+.ins{display:flex;gap:13px;background:var(--panel);border-radius:14px;box-shadow:var(--shadow);padding:15px 16px;border:1px solid #eef1f6}
+.ins .em{width:38px;height:38px;border-radius:11px;flex:none;display:flex;align-items:center;justify-content:center;font-size:18px}
+.ins .h{font-weight:700;font-size:13.5px}
+.ins .b{font-size:12.8px;color:#475569;margin-top:3px;line-height:1.5}
+.tag-pos{background:var(--green-soft)} .tag-neg{background:var(--red-soft)} .tag-info{background:var(--primary-soft)} .tag-warn{background:var(--amber-soft)}
+.foot{margin-top:34px;text-align:center;color:var(--muted);font-size:11.5px;line-height:1.7}
+.note{font-size:11.5px;color:var(--muted);background:#f8fafc;border:1px dashed var(--line);border-radius:10px;padding:9px 13px;margin-top:10px}
+@media(max-width:980px){.kpis{grid-template-columns:repeat(2,1fr)}.goals,.grid2,.grid3{grid-template-columns:1fr}.segs{grid-template-columns:repeat(2,1fr)}.insights{grid-template-columns:1fr}.filters{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="topbar">
+    <h1><span class="logo">D</span> DRAGO · Dashboard Comercial B2B</h1>
+    <p>Monitoreo ejecutivo de ventas, clientes, cumplimiento de metas y crecimiento comercial. Una sola vista para entender el estado del negocio en menos de 30 segundos.</p>
+    <div class="meta">
+      <span>Periodo de datos: <b>Enero – Mayo 2026</b></span>
+      <span>Vendedor: <b>Rodolfo Quirino</b></span>
+      <span>Facturas: <b id="m-inv">212</b></span>
+      <span>Clientes: <b id="m-cust">23</b></span>
+      <span>Moneda: <b>USD ($)</b></span>
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filters">
+    <div class="fgroup">
+      <span class="flabel">Año</span>
+      <div class="chips"><span class="chip year">2026</span></div>
+    </div>
+    <div class="fgroup">
+      <span class="flabel">Mes (selección múltiple)</span>
+      <div class="chips" id="month-chips"></div>
+    </div>
+    <div class="fgroup">
+      <span class="flabel">Cliente (selección múltiple)</span>
+      <div class="cust-box">
+        <div class="cust-btn" id="cust-btn">
+          <span id="cust-btn-label">Todos los clientes</span>
+          <span class="cnt" id="cust-cnt">23</span>
+        </div>
+        <div class="cust-panel" id="cust-panel">
+          <input class="cust-search" id="cust-search" placeholder="Buscar cliente…">
+          <div id="cust-list"></div>
+        </div>
+      </div>
+    </div>
+    <div class="fgroup">
+      <span class="flabel">&nbsp;</span>
+      <button class="btn btn-ghost" id="reset-btn">↺ Limpiar filtros</button>
+    </div>
+  </div>
+
+  <!-- RESUMEN EJECUTIVO -->
+  <div class="sec-title"><span class="bar"></span><h2>Resumen ejecutivo</h2><span>¿Dónde estamos? ¿Cuánto vendimos? ¿Vamos arriba o abajo de la meta?</span></div>
+  <div class="kpis" id="kpis"></div>
+
+  <!-- METAS -->
+  <div class="sec-title"><span class="bar"></span><h2>Metas comerciales</h2><span>Avance contra meta mensual, agresiva y anual · semáforo de desempeño</span></div>
+  <div class="goals" id="goals"></div>
+
+  <!-- ANALISIS DE VENTAS -->
+  <div class="sec-title"><span class="bar"></span><h2>Análisis de ventas</h2><span>Evolución mensual, tendencia acumulada y crecimiento</span></div>
+  <div class="grid2">
+    <div class="card">
+      <h3>Ventas por mes vs metas <span class="hint">barras = ventas · líneas = meta base/agresiva</span></h3>
+      <div class="chart-box"><canvas id="chart-monthly"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>Venta acumulada YTD <span class="hint">curva acumulada vs ritmo necesario</span></h3>
+      <div class="chart-box"><canvas id="chart-cum"></canvas></div>
+    </div>
+  </div>
+  <div class="grid2" style="margin-top:14px">
+    <div class="card">
+      <h3>Crecimiento mensual <span class="hint">variación % mes contra mes</span></h3>
+      <div class="chart-box chart-sm"><canvas id="chart-growth"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>Comparador dinámico de meses <span class="hint">elige 2+ meses para comparar</span></h3>
+      <div class="cmp-bar" id="cmp-chips"></div>
+      <div class="cmp-out" id="cmp-out"></div>
+    </div>
+  </div>
+
+  <!-- ANALISIS DE CLIENTES -->
+  <div class="sec-title"><span class="bar"></span><h2>Análisis de clientes</h2><span>Top 10, ranking completo, participación y crecimiento</span></div>
+  <div class="grid3">
+    <div class="card">
+      <h3>Top 10 clientes por facturación <span class="hint">USD acumulado del periodo</span></h3>
+      <div class="chart-box" style="height:360px"><canvas id="chart-top"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>Concentración de cartera <span class="hint">aporte de los principales clientes</span></h3>
+      <div class="chart-box" style="height:360px"><canvas id="chart-donut"></canvas></div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <h3>Tabla ejecutiva interactiva <span class="hint">clic en encabezados para ordenar</span></h3>
+    <div class="tbl-wrap">
+      <table id="exec-table">
+        <thead><tr>
+          <th data-k="rank">#</th>
+          <th data-k="cust">Cliente</th>
+          <th data-k="total">Venta total</th>
+          <th data-k="avg">Prom. mensual</th>
+          <th data-k="share">Participación</th>
+          <th data-k="growth">Crec. último mes</th>
+          <th data-k="inv">Facturas</th>
+          <th data-k="out">Saldo pendiente</th>
+        </tr></thead>
+        <tbody id="exec-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- PARETO -->
+  <div class="sec-title"><span class="bar"></span><h2>Pareto 80/20</h2><span>Qué clientes generan el 80% de las ventas</span></div>
+  <div class="grid3">
+    <div class="card">
+      <h3>Curva de Pareto <span class="hint">barras = venta · línea = % acumulado</span></h3>
+      <div class="chart-box" style="height:340px"><canvas id="chart-pareto"></canvas></div>
+    </div>
+    <div class="card">
+      <div id="pareto-insight"></div>
+    </div>
+  </div>
+
+  <!-- HEATMAP -->
+  <div class="sec-title"><span class="bar"></span><h2>Mapa de calor · clientes por mes</h2><span>Intensidad de compra por cliente y mes</span></div>
+  <div class="card"><div class="heat" id="heatmap"></div></div>
+
+  <!-- SEGMENTOS -->
+  <div class="sec-title"><span class="bar"></span><h2>Clientes activos</h2><span>Clasificación automática de la cartera (referencia: último mes seleccionado)</span></div>
+  <div class="segs" id="segs"></div>
+  <div class="note" id="seg-note"></div>
+
+  <!-- FORECAST -->
+  <div class="sec-title"><span class="bar"></span><h2>Proyecciones y forecast</h2><span>Cierre esperado del año basado en tendencia histórica (Ene–May)</span></div>
+  <div class="grid2">
+    <div class="card">
+      <h3>Forecast de cierre anual <span class="hint">actual + proyección de meses restantes</span></h3>
+      <div class="chart-box"><canvas id="chart-forecast"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>Escenarios de proyección</h3>
+      <div id="forecast-cards"></div>
+    </div>
+  </div>
+
+  <!-- INSIGHTS -->
+  <div class="sec-title"><span class="bar"></span><h2>Insights automáticos</h2><span>Conclusiones, riesgos y oportunidades detectadas</span></div>
+  <div class="insights" id="insights"></div>
+
+  <div class="foot">
+    Dashboard generado a partir de <b>lista definitiva drago333.xlsx</b> · 212 facturas · Ene–May 2026 · Vendedor: Rodolfo Quirino.<br>
+    Metas: anual USD $2,040,000 · mensual base $170,000 · mensual agresiva $250,000. Los importes corresponden a "Total invoiced". Proyecciones basadas en run-rate y tendencia lineal de los meses con datos.
+  </div>
+</div>
+
+<script>
+/* ===================== DATOS ===================== */
+const RECORDS = [{"m": 1, "cust": "Lonestar Food Truck", "tot": 6192.55, "paid": 6192.55, "out": 0.0, "pay": "Paid"}, {"m": 1, "cust": "MVA Restaurant Equipment - San Antonio (Universal Food Trailers)", "tot": 2338.64, "paid": 2338.64, "out": 0.0, "pay": "Paid"}, {"m": 1, "cust": "MVA Restaurant Equipment - San Antonio (Universal Food Trailers)", "tot": 1254.97, "paid": 1254.97, "out": 0.0, "pay": "Paid"}, {"m": 1, "cust": "MVA Restaurant Equipment - San Antonio (Universal Food Trailers)", "tot": 3756.95, "paid": 3756.95, "out": 0.0, "pay": "Paid"}, {"m": 1, "cust": "JR's Food Trailers Sales & Repairs, Inc.", "tot": 18187.55, "paid": 18187.55, "out": 0.0, "pay": "Paid"}, {"m": 1, "cust": "JR's Food Trailers Sales & Repairs, Inc.", "tot": 13126.47, "paid": 13126.47, "out": 0.0, "pay": "Paid"}, {"m": 1, "cust": "Think Big Trailers", "tot": 4262.11, "paid": 4262.11, "out": 0.0, "pay": "Paid"}, {"m": 1, "cust": "ABA Manufacturing LLC - Rancho Trailers", "tot": 1095.08, "paid": 1095.08, "out": 0.0, "pay": "Paid"}, {"m": 1, "cust": "Think Big Trailers", "tot": 3906.2, "paid": 3906.2, "out": 0.0, "pay": "Paid"}, {"m": 1, "cust": "MVA Restaurant Equipment - San Antonio (Universal Food Trailers)", "tot": 3388.37, "paid": 3388.37, "out": 0.0, "pay": "Paid"}, {"m": 1, "cust": "MVA Restaurant Equipment - San Antonio (Universal Food Trailers)", "tot": 4343.76, "paid": 4343.76, "out": 0.0, "pay": "Paid"}, {"m": 1, "cust": "MVA Restaurant Equipment - San Antonio (Universal Food Trailers)", "tot": 8005.89, "paid": 8005.89, "out": 0.0, "pay": "Paid"}, {"m": 1, "cust": "Texas Built Food Trailers Inc.", "tot": 6871.58, "paid": 6871.58, "out": 0.0, "pay": "Paid"}, {"m": 1, "cust": "Mobile Kitchen Innovations LLC", "tot": 407.53, "paid": 407.53, "out": 0.0, "pay": "Paid"}, {"m": 1, "cust": "Think Big Trailers", "tot": 3697.03, "paid": 3697.03, "out": 0.0, "pay": "Paid"}, {"m": 1, "cust": "Think Big Trailers", "tot": 1523.92, "paid": 1523.92, "out": 0.0, "pay": "Paid"}, {"m": 1, "cust": "Bigticket Sales", "tot": 5558.01, "paid": 5558.01, "out": 0.0, "pay": "Paid"}, {"m": 1, "cust": "Food Trailer Pros, LLC", "tot": 4829.97, "paid": 4829.97, "out": 0.0, "pay": "Paid"}, {"m": 1, "cust": "Trailer Builder/Utility Trailer LLC", "tot": 1230.84, "paid": 1230.84, "out": 0.0, "pay": "Paid"}, {"m": 1, "cust": "Trailer Builder/Utility Trailer LLC", "tot": 8732.97, "paid": 8732.97, "out": 0.0, "pay": "Paid"}, {"m": 1, "cust": "Titan Food Trailers, LLC", "tot": 517.64, "paid": 517.64, "out": 0.0, "pay": "Paid"}, {"m": 1, "cust": "Titan Food Trailers, LLC", "tot": 515.64, "paid": 515.64, "out": 0.0, "pay": "Paid"}, {"m": 1, "cust": "Titan Food Trailers, LLC", "tot": 2243.35, "paid": 2243.35, "out": 0.0, "pay": "Paid"}, {"m": 2, "cust": "JR's Food Trailers Sales & Repairs, Inc.", "tot": 8420.32, "paid": 8420.32, "out": 0.0, "pay": "Paid"}, {"m": 2, "cust": "Mobile Kitchen Innovations LLC", "tot": 8081.87, "paid": 8081.87, "out": 0.0, "pay": "Paid"}, {"m": 2, "cust": "ATX Food Truck Builder, LLC", "tot": 1263.56, "paid": 1263.56, "out": 0.0, "pay": "Paid"}, {"m": 2, "cust": "Artisan Metals", "tot": 1027.03, "paid": 1027.03, "out": 0.0, "pay": "Paid"}, {"m": 2, "cust": "Food Trailer Pros, LLC", "tot": 3835.66, "paid": 3832.65, "out": 3.01, "pay": "Partially paid"}, {"m": 2, "cust": "Titan Food Trailers, LLC", "tot": 5859.48, "paid": 0.0, "out": 5859.48, "pay": "Unpaid"}, {"m": 2, "cust": "ABA Manufacturing LLC - Rancho Trailers", "tot": 3727.81, "paid": 0.0, "out": 3727.81, "pay": "Unpaid"}, {"m": 2, "cust": "Trailer Builder/Utility Trailer LLC", "tot": 3995.8, "paid": 3995.8, "out": 0.0, "pay": "Paid"}, {"m": 2, "cust": "MVA Restaurant Equipment - San Antonio (Universal Food Trailers)", "tot": 178.09, "paid": 178.09, "out": 0.0, "pay": "Paid"}, {"m": 2, "cust": "Texas Built Food Trailers Inc.", "tot": 11470.32, "paid": 11470.32, "out": 0.0, "pay": "Paid"}, {"m": 2, "cust": "MVA Restaurant Equipment - San Antonio (Universal Food Trailers)", "tot": 2585.36, "paid": 2585.36, "out": 0.0, "pay": "Paid"}, {"m": 2, "cust": "MVA Restaurant Equipment - San Antonio (Universal Food Trailers)", "tot": 3172.77, "paid": 3172.77, "out": 0.0, "pay": "Paid"}, {"m": 2, "cust": "Lonestar Food Truck", "tot": 4293.4, "paid": 4293.4, "out": 0.0, "pay": "Paid"}, {"m": 2, "cust": "ABA Manufacturing LLC - Rancho Trailers", "tot": 6626.64, "paid": 6626.64, "out": 0.0, "pay": "Paid"}, {"m": 2, "cust": "Think Big Trailers", "tot": 4147.18, "paid": 4147.18, "out": 0.0, "pay": "Paid"}, {"m": 2, "cust": "Trailer Builder/Utility Trailer LLC", "tot": 1562.39, "paid": 1562.39, "out": 0.0, "pay": "Paid"}, {"m": 2, "cust": "Trailer Builder/Utility Trailer LLC", "tot": 2319.66, "paid": 2319.66, "out": 0.0, "pay": "Paid"}, {"m": 2, "cust": "Think Big Trailers", "tot": 4963.33, "paid": 4963.33, "out": 0.0, "pay": "Paid"}, {"m": 2, "cust": "Remux Food Trailers, LLC", "tot": 8051.75, "paid": 8051.75, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "Artisan Metals", "tot": 1581.71, "paid": 1581.71, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "Food Trailer Pros, LLC", "tot": 3702.88, "paid": 3702.88, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "JR's Food Trailers Sales & Repairs, Inc.", "tot": 36332.86, "paid": 36332.86, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "Think Big Trailers", "tot": 5860.09, "paid": 5860.09, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "MVA Restaurant Equipment - San Antonio (Universal Food Trailers)", "tot": 959.51, "paid": 959.51, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "MVA Restaurant Equipment - San Antonio (Universal Food Trailers)", "tot": 2681.02, "paid": 2681.02, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "MVA Restaurant Equipment - San Antonio (Universal Food Trailers)", "tot": 3497.56, "paid": 3497.56, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "Fud Trailers Martinez SA de CV", "tot": 1309.79, "paid": 1309.79, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "ATX Food Truck Builder, LLC", "tot": 782.85, "paid": 782.85, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "Bigticket Sales", "tot": 2272.01, "paid": 2272.01, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "Bigticket Sales", "tot": 1629.25, "paid": 1629.25, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "MVA Restaurant Equipment - Dallas", "tot": 3677.54, "paid": 3667.84, "out": 9.7, "pay": "Partially paid"}, {"m": 3, "cust": "MVA Restaurant Equipment - San Antonio (Universal Food Trailers)", "tot": 975.0, "paid": 975.0, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "Bigticket Sales", "tot": 454.79, "paid": 454.79, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "MVA Restaurant Equipment - Dallas", "tot": 2983.82, "paid": 2983.82, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "MVA Restaurant Equipment - Dallas", "tot": 2432.29, "paid": 2432.29, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "MVA Restaurant Equipment - Dallas", "tot": 1760.58, "paid": 1760.58, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "Titan Food Trailers, LLC", "tot": 2882.4, "paid": 0.0, "out": 2882.4, "pay": "Unpaid"}, {"m": 3, "cust": "Remux Food Trailers, LLC", "tot": 3821.16, "paid": 3821.16, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "Texas Built Food Trailers Inc.", "tot": 4253.83, "paid": 4253.83, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "Lonestar Food Truck", "tot": 1290.39, "paid": 1290.39, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "MVA Restaurant Equipment - Dallas", "tot": 2661.52, "paid": 2661.52, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "Sanchez Foodtrailers LLC", "tot": 6651.38, "paid": 6651.38, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "MVA Restaurant Equipment - Dallas", "tot": 559.19, "paid": 559.19, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "MVA Restaurant Equipment - Dallas", "tot": 3126.44, "paid": 3126.44, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "MVA Restaurant Equipment - Dallas", "tot": 949.56, "paid": 949.56, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "Titan Food Trailers, LLC", "tot": 3135.48, "paid": 0.0, "out": 3135.48, "pay": "Unpaid"}, {"m": 3, "cust": "MVA Restaurant Equipment - Dallas", "tot": 7573.41, "paid": 7573.41, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "MVA Restaurant Equipment - Dallas", "tot": 1820.64, "paid": 1820.64, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "MVA Restaurant Equipment - San Antonio (Universal Food Trailers)", "tot": 3497.38, "paid": 3497.38, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "MVA Restaurant Equipment - San Antonio (Universal Food Trailers)", "tot": 3462.75, "paid": 3462.75, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "MVA Restaurant Equipment - San Antonio (Universal Food Trailers)", "tot": 6040.0, "paid": 6040.0, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "MVA Restaurant Equipment - San Antonio (Universal Food Trailers)", "tot": 12413.36, "paid": 12413.36, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "MVA Restaurant Equipment - San Antonio (Universal Food Trailers)", "tot": 1443.13, "paid": 1443.13, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "Birrieria el Conejo", "tot": 2819.39, "paid": 2819.39, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "Trailer Builder/Utility Trailer LLC", "tot": 7079.45, "paid": 7079.45, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "ATX Food Truck Builder, LLC", "tot": 793.15, "paid": 793.15, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "Think Big Trailers", "tot": 4027.91, "paid": 4027.91, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "MVA Restaurant Equipment - Dallas", "tot": 10582.24, "paid": 10582.24, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "Food Trailer Pros, LLC", "tot": 4933.57, "paid": 4933.57, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "Food Trailer Pros, LLC", "tot": 1826.17, "paid": 1826.17, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "MVA Restaurant Equipment - Dallas", "tot": 2878.5, "paid": 2878.5, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "Lunch Box Food Trailers", "tot": 1823.08, "paid": 1823.08, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "ABA Manufacturing LLC - Rancho Trailers", "tot": 2857.7, "paid": 2857.7, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "ABA Manufacturing LLC - Rancho Trailers", "tot": 3395.28, "paid": 3395.28, "out": 0.0, "pay": "Paid"}, {"m": 3, "cust": "ABA Manufacturing LLC - Rancho Trailers", "tot": 1693.6, "paid": 1693.6, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "Bigticket Sales", "tot": 6388.16, "paid": 6388.16, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "Mobile Kitchen Innovations LLC", "tot": 5237.68, "paid": 5237.68, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "Texas Built Food Trailers Inc.", "tot": 12984.29, "paid": 12984.29, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "Think Big Trailers", "tot": 5926.84, "paid": 5926.84, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "MVA Restaurant Equipment - Dallas", "tot": 2060.36, "paid": 2060.36, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "MVA Restaurant Equipment - Dallas", "tot": 3524.01, "paid": 3524.01, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "MVA Restaurant Equipment - Dallas", "tot": 5156.53, "paid": 5156.53, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "MVA Restaurant Equipment - Dallas", "tot": 2672.1, "paid": 2672.1, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "Titan Food Trailers, LLC", "tot": 6026.82, "paid": 0.0, "out": 6026.82, "pay": "Unpaid"}, {"m": 4, "cust": "Food Trailer Pros, LLC", "tot": 3737.45, "paid": 3737.45, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "ABA Manufacturing LLC - Rancho Trailers", "tot": 5602.21, "paid": 5602.21, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "Custom Food Trailers LLC", "tot": 5525.42, "paid": 5525.42, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "ABA Manufacturing LLC - Rancho Trailers", "tot": 1766.36, "paid": 1766.36, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "Remux Food Trailers, LLC", "tot": 3756.62, "paid": 3756.62, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "MVA Restaurant Equipment - Dallas", "tot": 1005.78, "paid": 1005.78, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "MVA Restaurant Equipment - Dallas", "tot": 1944.02, "paid": 1944.02, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "Artisan Metals", "tot": 3018.05, "paid": 3018.05, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "Artisan Metals", "tot": 681.63, "paid": 681.63, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "Bigticket Sales", "tot": 4261.78, "paid": 4261.78, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "MVA Restaurant Equipment - Dallas", "tot": 3036.13, "paid": 3036.13, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "Think Big Trailers", "tot": 4066.61, "paid": 4066.61, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "Food Trailer Pros, LLC", "tot": 3776.15, "paid": 3776.15, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "Trailer Builder/Utility Trailer LLC", "tot": 3881.06, "paid": 3881.06, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "Titan Food Trailers, LLC", "tot": 3436.91, "paid": 0.0, "out": 3436.91, "pay": "Unpaid"}, {"m": 4, "cust": "Titan Food Trailers, LLC", "tot": 559.19, "paid": 0.0, "out": 559.19, "pay": "Unpaid"}, {"m": 4, "cust": "Titan Food Trailers, LLC", "tot": 4041.61, "paid": 0.0, "out": 4041.61, "pay": "Unpaid"}, {"m": 4, "cust": "Bigticket Sales", "tot": 584.55, "paid": 584.55, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "JR's Food Trailers Sales & Repairs, Inc.", "tot": 8447.86, "paid": 8447.86, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "JR's Food Trailers Sales & Repairs, Inc.", "tot": 2532.0, "paid": 2532.0, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "Think Big Trailers", "tot": 6064.51, "paid": 6064.51, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "Think Big Trailers", "tot": 3865.7, "paid": 3865.7, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "MVA Restaurant Equipment - Dallas", "tot": 2443.16, "paid": 2443.16, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "Bigticket Sales", "tot": 4665.3, "paid": 4665.3, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "MVA Restaurant Equipment - Dallas", "tot": 1392.34, "paid": 1392.34, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "MVA Restaurant Equipment - Dallas", "tot": 3148.72, "paid": 3148.72, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "Titan Food Trailers, LLC", "tot": 3116.01, "paid": 0.0, "out": 3116.01, "pay": "Unpaid"}, {"m": 4, "cust": "Texas Built Food Trailers Inc.", "tot": 9001.96, "paid": 9001.96, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "ABA Manufacturing LLC - Rancho Trailers", "tot": 2127.43, "paid": 2127.43, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "ABA Manufacturing LLC - Rancho Trailers", "tot": 3641.84, "paid": 3641.84, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "Think Big Trailers", "tot": 5670.81, "paid": 5670.81, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "MVA Restaurant Equipment - San Antonio (Universal Food Trailers)", "tot": 2472.29, "paid": 2472.29, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "MVA Restaurant Equipment - San Antonio (Universal Food Trailers)", "tot": 1694.63, "paid": 1694.63, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "MVA Restaurant Equipment - San Antonio (Universal Food Trailers)", "tot": 4267.51, "paid": 4267.51, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "MVA Restaurant Equipment - San Antonio (Universal Food Trailers)", "tot": 1311.59, "paid": 1311.59, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "Premier Food Trailers LLC", "tot": 3887.92, "paid": 3887.92, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "MVA Restaurant Equipment - Dallas", "tot": 844.41, "paid": 844.41, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "MVA Restaurant Equipment - Dallas", "tot": 941.99, "paid": 941.99, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "MVA Restaurant Equipment - Dallas", "tot": 1627.29, "paid": 1627.29, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "Bigticket Sales", "tot": 4227.17, "paid": 4227.17, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "JR's Food Trailers Sales & Repairs, Inc.", "tot": 36409.62, "paid": 36409.62, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "Food Trailer Pros, LLC", "tot": 4763.9, "paid": 4763.9, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "MVA Restaurant Equipment - Dallas", "tot": 4934.36, "paid": 4934.36, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "MVA Restaurant Equipment - Dallas", "tot": 1159.65, "paid": 1159.65, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "Remux Food Trailers, LLC", "tot": 4623.02, "paid": 4623.02, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "Think Big Trailers", "tot": 2606.53, "paid": 2606.53, "out": 0.0, "pay": "Paid"}, {"m": 4, "cust": "Titan Food Trailers, LLC", "tot": 2801.16, "paid": 0.0, "out": 2801.16, "pay": "Unpaid"}, {"m": 4, "cust": "Titan Food Trailers, LLC", "tot": 8867.75, "paid": 0.0, "out": 8867.75, "pay": "Unpaid"}, {"m": 5, "cust": "ATX Food Truck Builder, LLC", "tot": 1396.46, "paid": 1396.46, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "Custom Food Trailers LLC", "tot": 2185.21, "paid": 2185.21, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "MVA Restaurant Equipment - Dallas", "tot": 3231.28, "paid": 3231.28, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "Texas Built Food Trailers Inc.", "tot": 6562.05, "paid": 6562.05, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "Remux Food Trailers, LLC", "tot": 5747.91, "paid": 5747.91, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "Trailer Builder/Utility Trailer LLC", "tot": 3718.99, "paid": 3718.99, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "Think Big Trailers", "tot": 2413.15, "paid": 2413.15, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "Think Big Trailers", "tot": 3778.17, "paid": 3778.17, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "Bigticket Sales", "tot": 6573.49, "paid": 6573.49, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "Think Big Trailers", "tot": 1970.34, "paid": 1970.34, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "Texas Built Food Trailers Inc.", "tot": 4933.94, "paid": 4933.94, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "MVA Restaurant Equipment - Dallas", "tot": 236.44, "paid": 236.44, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "Remux Food Trailers, LLC", "tot": 3634.48, "paid": 3634.48, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "MVA Restaurant Equipment - Dallas", "tot": 795.62, "paid": 795.62, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "MVA Restaurant Equipment - Dallas", "tot": 2578.27, "paid": 2578.27, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "MVA Restaurant Equipment - Dallas", "tot": 1966.54, "paid": 1966.54, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "ABA Manufacturing LLC - Rancho Trailers", "tot": 4086.48, "paid": 4086.48, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "ABA Manufacturing LLC - Rancho Trailers", "tot": 2724.31, "paid": 2724.31, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "ABA Manufacturing LLC - Rancho Trailers", "tot": 388.16, "paid": 388.16, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "Trailer Builder/Utility Trailer LLC", "tot": 1689.79, "paid": 1689.79, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "MVA Restaurant Equipment - San Antonio (Universal Food Trailers)", "tot": 5327.62, "paid": 5327.62, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "MVA Restaurant Equipment - San Antonio (Universal Food Trailers)", "tot": 6054.99, "paid": 6054.99, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "MVA Restaurant Equipment - Dallas", "tot": 3463.96, "paid": 3463.96, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "MVA Restaurant Equipment - Dallas", "tot": 576.48, "paid": 576.48, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "Think Big Trailers", "tot": 4415.99, "paid": 4415.99, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "Think Big Trailers", "tot": 2896.61, "paid": 2896.61, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "MVA Restaurant Equipment - Dallas", "tot": 2105.98, "paid": 2105.98, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "Remux Food Trailers, LLC", "tot": 4592.5, "paid": 4592.5, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "Think Big Trailers", "tot": 6801.63, "paid": 6801.63, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "Think Big Trailers", "tot": 4504.49, "paid": 4504.49, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "Texas Built Food Trailers Inc.", "tot": 3680.16, "paid": 3680.16, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "Texas Built Food Trailers Inc.", "tot": 2264.02, "paid": 2264.02, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "MVA Restaurant Equipment - Dallas", "tot": 2410.41, "paid": 2410.41, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "MVA Restaurant Equipment - Dallas", "tot": 1051.85, "paid": 1051.85, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "MVA Restaurant Equipment - Dallas", "tot": 3114.94, "paid": 3114.94, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "Think Big Trailers", "tot": 3853.15, "paid": 3853.15, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "ABA Manufacturing LLC - Rancho Trailers", "tot": 2752.61, "paid": 2752.61, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "Remux Food Trailers, LLC", "tot": 4462.44, "paid": 4462.44, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "MVA Restaurant Equipment - Dallas", "tot": 3114.94, "paid": 3114.94, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "MVA Restaurant Equipment - Dallas", "tot": 3253.8, "paid": 3253.8, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "MVA Restaurant Equipment - Dallas", "tot": 3178.74, "paid": 3178.74, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "ATX Food Truck Builder, LLC", "tot": 3776.73, "paid": 3776.73, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "Alvarez Legacy Ventures INC", "tot": 3481.04, "paid": 3481.04, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "Texas Built Food Trailers Inc.", "tot": 4798.64, "paid": 4798.64, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "Alvarez Legacy Ventures INC", "tot": 4331.99, "paid": 4331.99, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "MVA Restaurant Equipment - Dallas", "tot": 3794.22, "paid": 3794.22, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "MVA Restaurant Equipment - Dallas", "tot": 1260.99, "paid": 1260.99, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "Trailer Builder/Utility Trailer LLC", "tot": 3690.48, "paid": 3690.48, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "Premier Food Trailers LLC", "tot": 8037.28, "paid": 8037.28, "out": 0.0, "pay": "Paid"}, {"m": 5, "cust": "Titan Food Trailers, LLC", "tot": 4602.09, "paid": 4602.09, "out": 4602.09, "pay": "Unpaid"}, {"m": 5, "cust": "Titan Food Trailers, LLC", "tot": 1092.61, "paid": 1092.61, "out": 1092.61, "pay": "Unpaid"}, {"m": 5, "cust": "Titan Food Trailers, LLC", "tot": 1733.31, "paid": 1733.31, "out": 1733.31, "pay": "Unpaid"}, {"m": 5, "cust": "Titan Food Trailers, LLC", "tot": 2245.57, "paid": 2245.57, "out": 2245.57, "pay": "Unpaid"}, {"m": 5, "cust": "Titan Food Trailers, LLC", "tot": 2234.26, "paid": 2234.26, "out": 2234.26, "pay": "Unpaid"}, {"m": 5, "cust": "Titan Food Trailers, LLC", "tot": 1092.61, "paid": 1092.61, "out": 1092.61, "pay": "Unpaid"}, {"m": 5, "cust": "Titan Food Trailers, LLC", "tot": 1088.55, "paid": 1088.55, "out": 1088.55, "pay": "Unpaid"}, {"m": 5, "cust": "Titan Food Trailers, LLC", "tot": 2344.52, "paid": 2344.52, "out": 2344.52, "pay": "Unpaid"}, {"m": 5, "cust": "Titan Food Trailers, LLC", "tot": 4718.24, "paid": 4718.24, "out": 4718.24, "pay": "Unpaid"}, {"m": 5, "cust": "Titan Food Trailers, LLC", "tot": 3770.25, "paid": 3770.25, "out": 3770.25, "pay": "Unpaid"}, {"m": 5, "cust": "Titan Food Trailers, LLC", "tot": 3193.77, "paid": 3193.77, "out": 3193.77, "pay": "Unpaid"}, {"m": 5, "cust": "Titan Food Trailers, LLC", "tot": 5441.27, "paid": 5441.27, "out": 5441.27, "pay": "Unpaid"}, {"m": 5, "cust": "Titan Food Trailers, LLC", "tot": 1141.36, "paid": 1141.36, "out": 1141.36, "pay": "Unpaid"}, {"m": 5, "cust": "JKS -7325 W. Sam Houston Pkwy.", "tot": 1216.38, "paid": 1216.38, "out": 1216.38, "pay": "Unpaid"}, {"m": 5, "cust": "Titan Food Trailers, LLC", "tot": 1428.17, "paid": 1428.17, "out": 1428.17, "pay": "Unpaid"}, {"m": 5, "cust": "Titan Food Trailers, LLC", "tot": 1863.75, "paid": 1863.75, "out": 1863.75, "pay": "Unpaid"}, {"m": 5, "cust": "Titan Food Trailers, LLC", "tot": 1118.37, "paid": 1118.37, "out": 1118.37, "pay": "Unpaid"}, {"m": 5, "cust": "Titan Food Trailers, LLC", "tot": 465.37, "paid": 465.37, "out": 465.37, "pay": "Unpaid"}];
+const MES = {1:'Enero',2:'Febrero',3:'Marzo',4:'Abril',5:'Mayo'};
+const MES_S = {1:'Ene',2:'Feb',3:'Mar',4:'Abr',5:'May'};
+const ALL_M = [1,2,3,4,5];
+const GOAL_Y = 2040000, GOAL_M = 170000, GOAL_A = 250000;
+const REMAIN_MONTHS = 7; // Jun-Dic
+const ALL_CUST = [...new Set(RECORDS.map(r=>r.cust))].sort((a,b)=>a.localeCompare(b,'es'));
+const C = {primary:'#4f46e5',accent:'#0ea5e9',teal:'#14b8a6',green:'#16a34a',amber:'#f59e0b',red:'#dc2626',navy:'#0b1736',muted:'#94a3b8'};
+
+/* ===================== ESTADO ===================== */
+let selMonths = new Set(ALL_M);
+let selCust = new Set(ALL_CUST);
+let cmpMonths = new Set([4,5]);
+let sortKey='total', sortDir=-1;
+const charts={};
+
+/* ===================== HELPERS ===================== */
+const $=s=>document.querySelector(s);
+const money=n=>'$'+Math.round(n).toLocaleString('en-US');
+const money1=n=>'$'+n.toLocaleString('en-US',{maximumFractionDigits:0});
+const pct=(n,d=1)=>(n*100).toFixed(d)+'%';
+const signPct=n=>(n>=0?'+':'')+(n*100).toFixed(1)+'%';
+function recs(months=selMonths){return RECORDS.filter(r=>months.has(r.m)&&selCust.has(r.cust));}
+function sumBy(arr,k='tot'){return arr.reduce((s,r)=>s+r[k],0);}
+// serie mensual (respeta filtro de cliente, todos los meses 1..5)
+function monthSeriesAll(){const o={};ALL_M.forEach(m=>o[m]=0);RECORDS.filter(r=>selCust.has(r.cust)).forEach(r=>o[r.m]+=r.tot);return o;}
+function refMonth(){const a=[...selMonths].sort((x,y)=>x-y);return a.length?a[a.length-1]:5;}
+function custTotals(months=selMonths){const o={};recs(months).forEach(r=>{o[r.cust]=(o[r.cust]||0)+r.tot;});return o;}
+
+/* ===================== FILTROS UI ===================== */
+function buildMonthChips(){
+  const c=$('#month-chips');c.innerHTML='';
+  ALL_M.forEach(m=>{
+    const el=document.createElement('span');el.className='chip'+(selMonths.has(m)?' on':'');el.textContent=MES_S[m];
+    el.onclick=()=>{selMonths.has(m)?(selMonths.size>1&&selMonths.delete(m)):selMonths.add(m);buildMonthChips();render();};
+    c.appendChild(el);
+  });
+}
+function buildCustList(filter=''){
+  const tot=custTotalsAll();
+  const list=$('#cust-list');list.innerHTML='';
+  const head=document.createElement('div');head.className='cust-item';head.style.fontWeight='700';
+  const allOn=selCust.size===ALL_CUST.length;
+  head.innerHTML=`<input type="checkbox" ${allOn?'checked':''}><span>Todos los clientes</span>`;
+  head.onclick=()=>{if(selCust.size===ALL_CUST.length){selCust=new Set([ALL_CUST[0]]);}else{selCust=new Set(ALL_CUST);}buildCustList($('#cust-search').value);updateCustBtn();render();};
+  list.appendChild(head);
+  ALL_CUST.filter(c=>c.toLowerCase().includes(filter.toLowerCase())).forEach(c=>{
+    const el=document.createElement('label');el.className='cust-item';
+    el.innerHTML=`<input type="checkbox" ${selCust.has(c)?'checked':''}><span>${c}</span><span class="amt">${money(tot[c]||0)}</span>`;
+    el.querySelector('input').onchange=e=>{e.target.checked?selCust.add(c):(selCust.size>1&&selCust.delete(c));updateCustBtn();render();};
+    list.appendChild(el);
+  });
+}
+function custTotalsAll(){const o={};RECORDS.forEach(r=>o[r.cust]=(o[r.cust]||0)+r.tot);return o;}
+function updateCustBtn(){
+  $('#cust-cnt').textContent=selCust.size;
+  $('#cust-btn-label').textContent=selCust.size===ALL_CUST.length?'Todos los clientes':(selCust.size===1?[...selCust][0]:selCust.size+' clientes seleccionados');
+}
+
+/* ===================== KPIs ===================== */
+function renderKPIs(){
+  const f=recs();const ytd=sumBy(f);const inv=f.length;
+  const series=monthSeriesAll();const rm=refMonth();
+  const vRef=series[rm];const prev=rm-1>=1?series[rm-1]:null;
+  const grow=prev&&prev>0?(vRef-prev)/prev:null;
+  const cMonth=vRef/GOAL_M, cYear=ytd/GOAL_Y;
+  const diff=vRef-GOAL_M;
+  const activeCust=new Set(f.map(r=>r.cust)).size;
+  // forecast (todos los meses con datos, filtro cliente)
+  const fc=forecast();
+  const cards=[
+    {lab:'Venta acumulada (periodo)',ic:'💰',icbg:'var(--primary-soft)',val:money(ytd),sub:`${inv} facturas · ${selMonths.size} mes(es)`,bar:null},
+    {lab:'Venta · '+MES[rm],ic:'📅',icbg:'var(--primary-soft)',val:money(vRef),sub:`Mes de referencia`,pill:grow!=null?{cls:grow>=0?'up':'down',t:signPct(grow)+' vs '+(prev!=null?MES_S[rm-1]:'—')}:null},
+    {lab:'Cumpl. meta mensual',ic:'🎯',icbg:'var(--amber-soft)',val:pct(cMonth),sub:`Meta base ${money(GOAL_M)}`,bar:{v:cMonth,col:semColor(cMonth)}},
+    {lab:'Cumpl. meta anual',ic:'🏁',icbg:'var(--green-soft)',val:pct(cYear),sub:`Meta ${money(GOAL_Y)}`,bar:{v:cYear,col:C.primary}},
+    {lab:'Diferencia vs meta mensual',ic:diff>=0?'▲':'▼',icbg:diff>=0?'var(--green-soft)':'var(--red-soft)',val:(diff>=0?'+':'−')+money(Math.abs(diff)),sub:`${MES[rm]} vs $170,000`,pill:{cls:diff>=0?'up':'down',t:diff>=0?'Meta superada':'Por debajo'}},
+    {lab:'Crecimiento vs mes anterior',ic:'📈',icbg:'var(--primary-soft)',val:grow!=null?signPct(grow):'—',sub:prev!=null?`${MES_S[rm-1]} → ${MES_S[rm]}`:'sin mes previo',pill:grow!=null?{cls:grow>=0?'up':'down',t:grow>=0?'Acelerando':'Desacelerando'}:null},
+    {lab:'Clientes activos (periodo)',ic:'👥',icbg:'var(--primary-soft)',val:activeCust,sub:`de ${ALL_CUST.length} en cartera`},
+    {lab:'Proyección cierre anual',ic:'🔮',icbg:'var(--green-soft)',val:money(fc.headline),sub:`${pct(fc.headline/GOAL_Y)} de la meta · ritmo reciente`,pill:{cls:fc.headline>=GOAL_Y?'up':'down',t:(fc.headline>=GOAL_Y?'+':'−')+money(Math.abs(fc.headline-GOAL_Y))}}
+  ];
+  $('#kpis').innerHTML=cards.map(k=>`
+    <div class="kpi">
+      <div class="ic" style="background:${k.icbg}">${k.ic}</div>
+      <div class="lab">${k.lab}</div>
+      <div class="val">${k.val}</div>
+      <div class="sub">${k.sub}</div>
+      ${k.pill?`<span class="pill ${k.pill.cls}">${k.pill.t}</span>`:''}
+      ${k.bar?`<div class="mini"><i style="width:${Math.min(100,k.bar.v*100)}%;background:${k.bar.col}"></i></div>`:''}
+    </div>`).join('');
+}
+function semColor(v){return v>=1?C.green:v>=0.8?C.amber:C.red;}
+function semLabel(v){return v>=1?'Meta cumplida':v>=0.8?'En riesgo':'Por debajo';}
+
+/* ===================== METAS ===================== */
+function renderGoals(){
+  const series=monthSeriesAll();const rm=refMonth();const vRef=series[rm];
+  const ytd=sumBy(recs());
+  const items=[
+    {name:'Meta mensual base',tag:'$170,000',v:vRef/GOAL_M,det:`Venta ${MES[rm]}: <b>${money(vRef)}</b><br>Meta: <b>${money(GOAL_M)}</b><br>Faltante: <b>${money(Math.max(0,GOAL_M-vRef))}</b>`,col:semColor(vRef/GOAL_M)},
+    {name:'Meta mensual agresiva',tag:'$250,000',v:vRef/GOAL_A,det:`Venta ${MES[rm]}: <b>${money(vRef)}</b><br>Meta: <b>${money(GOAL_A)}</b><br>Faltante: <b>${money(Math.max(0,GOAL_A-vRef))}</b>`,col:semColor(vRef/GOAL_A)},
+    {name:'Meta anual',tag:'$2,040,000',v:ytd/GOAL_Y,det:`Acumulado: <b>${money(ytd)}</b><br>Meta: <b>${money(GOAL_Y)}</b><br>Faltante: <b>${money(Math.max(0,GOAL_Y-ytd))}</b>`,col:C.primary}
+  ];
+  $('#goals').innerHTML=items.map(g=>{
+    const pc=Math.min(100,g.v*100);const R=42,CIRC=2*Math.PI*R,off=CIRC*(1-Math.min(1,g.v));
+    const sc=semColor(g.v);
+    return `<div class="goal">
+      <div class="gh"><span class="name">${g.name}</span><span class="tag" style="background:${g.col}22;color:${g.col}">${g.tag}</span></div>
+      <div class="gauge">
+        <div class="ring">
+          <svg width="96" height="96">
+            <circle cx="48" cy="48" r="${R}" stroke="#eef1f6" stroke-width="10" fill="none"/>
+            <circle cx="48" cy="48" r="${R}" stroke="${g.col}" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="${CIRC}" stroke-dashoffset="${off}"/>
+          </svg>
+          <div class="pc"><b>${pc.toFixed(0)}%</b><small>avance</small></div>
+        </div>
+        <div class="gdet">${g.det}<br><span class="sem" style="background:${sc}"></span><b style="color:${sc}">${semLabel(g.v)}</b></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ===================== CHARTS VENTAS ===================== */
+function baseOpts(extra={}){return Object.assign({responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{boxWidth:12,font:{size:11}}}},},extra);}
+function renderMonthlyChart(){
+  const months=[...selMonths].sort((a,b)=>a-b);
+  const series=monthSeriesAll();
+  const data=months.map(m=>series[m]);
+  const ctx=$('#chart-monthly');if(charts.m)charts.m.destroy();
+  charts.m=new Chart(ctx,{data:{labels:months.map(m=>MES[m]),datasets:[
+    {type:'bar',label:'Ventas',data,backgroundColor:months.map(m=>series[m]>=GOAL_M?'#16a34a':series[m]>=GOAL_M*0.8?'#f59e0b':'#4f46e5'),borderRadius:7,maxBarThickness:64},
+    {type:'line',label:'Meta base',data:months.map(()=>GOAL_M),borderColor:C.amber,borderDash:[6,4],pointRadius:0,borderWidth:2},
+    {type:'line',label:'Meta agresiva',data:months.map(()=>GOAL_A),borderColor:C.red,borderDash:[3,3],pointRadius:0,borderWidth:2}
+  ]},options:baseOpts({scales:{y:{ticks:{callback:v=>'$'+(v/1000)+'k'}}},plugins:{legend:{display:true,position:'top'},tooltip:{callbacks:{label:c=>c.dataset.label+': '+money(c.raw)}}}})});
+}
+function renderCumChart(){
+  const months=[...selMonths].sort((a,b)=>a-b);
+  const series=monthSeriesAll();let acc=0;const cum=months.map(m=>acc+=series[m]);
+  // ritmo necesario para meta anual (lineal)
+  const pace=months.map((m)=>GOAL_Y/12*m);
+  const ctx=$('#chart-cum');if(charts.c)charts.c.destroy();
+  charts.c=new Chart(ctx,{data:{labels:months.map(m=>MES[m]),datasets:[
+    {type:'line',label:'Acumulado real',data:cum,borderColor:C.primary,backgroundColor:'rgba(79,70,229,.12)',fill:true,tension:.3,pointRadius:4,pointBackgroundColor:C.primary,borderWidth:3},
+    {type:'line',label:'Ritmo meta anual',data:pace,borderColor:C.muted,borderDash:[6,4],pointRadius:0,borderWidth:2}
+  ]},options:baseOpts({scales:{y:{ticks:{callback:v=>'$'+(v/1000)+'k'}}},plugins:{legend:{display:true,position:'top'},tooltip:{callbacks:{label:c=>c.dataset.label+': '+money(c.raw)}}}})});
+}
+function renderGrowthChart(){
+  const months=[...selMonths].sort((a,b)=>a-b);
+  const series=monthSeriesAll();
+  const labels=[],vals=[];
+  months.forEach(m=>{if(m-1>=1&&series[m-1]>0){labels.push(MES_S[m-1]+'→'+MES_S[m]);vals.push(((series[m]-series[m-1])/series[m-1])*100);}});
+  const ctx=$('#chart-growth');if(charts.g)charts.g.destroy();
+  charts.g=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Crecimiento %',data:vals,backgroundColor:vals.map(v=>v>=0?'#16a34a':'#dc2626'),borderRadius:6,maxBarThickness:60}]},
+    options:baseOpts({scales:{y:{ticks:{callback:v=>v+'%'}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>(c.raw>=0?'+':'')+c.raw.toFixed(1)+'%'}}}})});
+}
+
+/* ===================== COMPARADOR ===================== */
+function renderComparator(){
+  const c=$('#cmp-chips');c.innerHTML='';
+  ALL_M.forEach(m=>{const el=document.createElement('span');el.className='chip'+(cmpMonths.has(m)?' on':'');el.textContent=MES_S[m];
+    el.onclick=()=>{cmpMonths.has(m)?cmpMonths.delete(m):cmpMonths.add(m);renderComparator();};c.appendChild(el);});
+  const series=monthSeriesAll();const ms=[...cmpMonths].sort((a,b)=>a-b);
+  const out=$('#cmp-out');
+  if(ms.length<2){out.innerHTML='<div class="cmp-cell"><div class="l">Selecciona al menos 2 meses</div></div>';return;}
+  let html='';
+  ms.forEach(m=>html+=`<div class="cmp-cell"><div class="l">${MES[m]}</div><div class="v">${money(series[m])}</div></div>`);
+  const first=series[ms[0]],last=series[ms[ms.length-1]];
+  const dAbs=last-first;const dPct=first>0?dAbs/first:0;
+  html+=`<div class="cmp-cell" style="background:${dAbs>=0?'var(--green-soft)':'var(--red-soft)'};border:none">
+    <div class="l">Δ ${MES_S[ms[0]]} → ${MES_S[ms[ms.length-1]]}</div>
+    <div class="v" style="color:${dAbs>=0?'var(--green)':'var(--red)'}">${dAbs>=0?'+':'−'}${money(Math.abs(dAbs))}</div>
+    <div class="l" style="margin-top:2px;color:${dAbs>=0?'var(--green)':'var(--red)'};font-weight:700">${signPct(dPct)}</div></div>`;
+  const max=Math.max(...ms.map(m=>series[m])),min=Math.min(...ms.map(m=>series[m]));
+  const maxM=ms.find(m=>series[m]===max),minM=ms.find(m=>series[m]===min);
+  html+=`<div class="cmp-cell"><div class="l">Mejor / peor del rango</div><div class="v" style="font-size:14px">▲ ${MES_S[maxM]} ${money(max)}<br>▼ ${MES_S[minM]} ${money(min)}</div></div>`;
+  out.innerHTML=html;
+}
+
+/* ===================== CLIENTES: TOP + DONUT + TABLA ===================== */
+function clientStats(){
+  const tot=custTotals();const series=monthSeriesAll();const rm=refMonth();
+  const grand=sumBy(recs());
+  // per-customer monthly for growth + facturas + saldo
+  const perInv={},perOut={},perMonths={};
+  recs().forEach(r=>{perInv[r.cust]=(perInv[r.cust]||0)+1;perOut[r.cust]=(perOut[r.cust]||0)+r.out;(perMonths[r.cust]=perMonths[r.cust]||new Set()).add(r.m);});
+  const cmAll={};RECORDS.filter(r=>selCust.has(r.cust)).forEach(r=>{(cmAll[r.cust]=cmAll[r.cust]||{})[r.m]=(cmAll[r.cust]?.[r.m]||0)+r.tot;});
+  const rows=Object.keys(tot).map(c=>{
+    const cm=cmAll[c]||{};const vRef=cm[rm]||0,vPrev=(rm-1>=1?cm[rm-1]:0)||0;
+    let growth=null;if(vPrev>0)growth=(vRef-vPrev)/vPrev;else if(vRef>0)growth='new';
+    const nm=(perMonths[c]||new Set()).size;
+    return {cust:c,total:tot[c],avg:tot[c]/Math.max(1,nm),share:tot[c]/grand,growth,inv:perInv[c]||0,out:perOut[c]||0,vRef,vPrev};
+  });
+  return rows;
+}
+function renderTopChart(){
+  const rows=clientStats().sort((a,b)=>b.total-a.total).slice(0,10).reverse();
+  const ctx=$('#chart-top');if(charts.t)charts.t.destroy();
+  charts.t=new Chart(ctx,{type:'bar',data:{labels:rows.map(r=>r.cust.length>26?r.cust.slice(0,25)+'…':r.cust),datasets:[{label:'Venta',data:rows.map(r=>r.total),backgroundColor:rows.map((r,i)=>i===rows.length-1?'#4f46e5':'#818cf8'),borderRadius:6}]},
+    options:baseOpts({indexAxis:'y',scales:{x:{ticks:{callback:v=>'$'+(v/1000)+'k'}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>money(c.raw)}}}})});
+}
+function renderDonut(){
+  const rows=clientStats().sort((a,b)=>b.total-a.total);const grand=sumBy(recs());
+  const top=rows.slice(0,6);const rest=rows.slice(6).reduce((s,r)=>s+r.total,0);
+  const labels=top.map(r=>r.cust.length>22?r.cust.slice(0,21)+'…':r.cust).concat(rest>0?['Otros ('+(rows.length-6)+')']:[]);
+  const data=top.map(r=>r.total).concat(rest>0?[rest]:[]);
+  const cols=['#4f46e5','#0ea5e9','#14b8a6','#f59e0b','#a855f7','#ec4899','#cbd5e1'];
+  const ctx=$('#chart-donut');if(charts.d)charts.d.destroy();
+  charts.d=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:cols,borderWidth:2,borderColor:'#fff'}]},
+    options:baseOpts({cutout:'58%',plugins:{legend:{position:'bottom',labels:{boxWidth:11,font:{size:10.5}}},tooltip:{callbacks:{label:c=>c.label+': '+money(c.raw)+' ('+pct(c.raw/grand)+')'}}}})});
+}
+function renderTable(){
+  let rows=clientStats();
+  rows.sort((a,b)=>{
+    let av=a[sortKey],bv=b[sortKey];
+    if(sortKey==='cust')return sortDir*av.localeCompare(bv,'es');
+    if(av==='new')av=Infinity;if(bv==='new')bv=Infinity;
+    if(av==null)av=-Infinity;if(bv==null)bv=-Infinity;
+    return sortDir*(av-bv);
+  });
+  // rank by total fixed
+  const byTotal=[...rows].sort((a,b)=>b.total-a.total);const rankMap={};byTotal.forEach((r,i)=>rankMap[r.cust]=i+1);
+  const maxShare=Math.max(...rows.map(r=>r.share));
+  $('#exec-body').innerHTML=rows.map(r=>{
+    const rk=rankMap[r.cust];const rb=rk===1?'gold':rk===2?'silver':rk===3?'bronze':'';
+    let g;if(r.growth==='new')g='<span class="g-new">NUEVO</span>';else if(r.growth==null)g='<span style="color:#cbd5e1">—</span>';else g=`<span class="${r.growth>=0?'g-up':'g-down'}">${signPct(r.growth)}</span>`;
+    return `<tr>
+      <td><span class="rank-badge ${rb}">${rk}</span></td>
+      <td><div class="cust-name" title="${r.cust}">${r.cust}</div></td>
+      <td><b>${money(r.total)}</b></td>
+      <td>${money(r.avg)}</td>
+      <td><span class="share-bar" style="width:${(r.share/maxShare*60)+5}px"></span>${pct(r.share)}</td>
+      <td>${g}</td>
+      <td>${r.inv}</td>
+      <td style="color:${r.out>0?'var(--red)':'#cbd5e1'};font-weight:${r.out>0?'700':'400'}">${r.out>0?money(r.out):'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ===================== PARETO ===================== */
+function paretoData(){
+  const rows=clientStats().sort((a,b)=>b.total-a.total);const grand=sumBy(recs());
+  let acc=0;const out=rows.map(r=>{acc+=r.total;return {cust:r.cust,total:r.total,cumPct:acc/grand};});
+  let n80=out.findIndex(r=>r.cumPct>=0.8);n80=n80<0?out.length:n80+1;
+  return {out,n80,grand,rows};
+}
+function renderPareto(){
+  const {out,n80,grand}=paretoData();
+  const top=out.slice(0,12);
+  const ctx=$('#chart-pareto');if(charts.p)charts.p.destroy();
+  charts.p=new Chart(ctx,{data:{labels:top.map(r=>r.cust.length>16?r.cust.slice(0,15)+'…':r.cust),datasets:[
+    {type:'bar',label:'Venta',data:top.map(r=>r.total),backgroundColor:top.map((r,i)=>i<n80?'#4f46e5':'#c7d2fe'),borderRadius:5,yAxisID:'y'},
+    {type:'line',label:'% acumulado',data:top.map(r=>r.cumPct*100),borderColor:C.amber,backgroundColor:C.amber,yAxisID:'y1',tension:.25,pointRadius:3,borderWidth:2.5}
+  ]},options:baseOpts({scales:{y:{ticks:{callback:v=>'$'+(v/1000)+'k'}},y1:{position:'right',min:0,max:100,grid:{drawOnChartArea:false},ticks:{callback:v=>v+'%'}},x:{ticks:{font:{size:9},maxRotation:60,minRotation:45}}},plugins:{legend:{display:true,position:'top'},tooltip:{callbacks:{label:c=>c.dataset.type==='line'?'Acum: '+c.raw.toFixed(1)+'%':money(c.raw)}}}})});
+  const {rows}=paretoData();
+  const strat=rows.slice(0,n80).map(r=>r.cust);
+  const pctClients=n80/rows.length;
+  $('#pareto-insight').innerHTML=`
+    <h3 style="margin-bottom:10px">Insight estratégico 80/20</h3>
+    <div style="background:var(--primary-soft);border-radius:12px;padding:14px;margin-bottom:12px">
+      <div style="font-size:30px;font-weight:800;color:var(--primary)">${n80} clientes</div>
+      <div style="font-size:13px;color:#475569;margin-top:2px">generan el <b>~80%</b> de la facturación (${pct(pctClients)} de la cartera de ${rows.length}).</div>
+    </div>
+    <div style="font-size:12.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:7px">Clientes estratégicos</div>
+    <ol style="margin-left:18px;font-size:12.8px;line-height:1.8;color:#334155">${strat.map(c=>`<li>${c}</li>`).join('')}</ol>
+    <div class="note" style="margin-top:12px">Concentrar fidelización y atención prioritaria en estos clientes protege la mayor parte del ingreso. Diversificar reduce el riesgo de dependencia.</div>`;
+}
+
+/* ===================== HEATMAP ===================== */
+function renderHeatmap(){
+  const rows=clientStats().sort((a,b)=>b.total-a.total);
+  const cmAll={};RECORDS.filter(r=>selCust.has(r.cust)).forEach(r=>{(cmAll[r.cust]=cmAll[r.cust]||{})[r.m]=(cmAll[r.cust]?.[r.m]||0)+r.tot;});
+  const months=[...selMonths].sort((a,b)=>a-b);
+  let max=0;rows.forEach(r=>months.forEach(m=>{const v=(cmAll[r.cust]?.[m])||0;if(v>max)max=v;}));
+  let h='<table><thead><tr><th class="name" style="text-align:left">Cliente</th>'+months.map(m=>`<th>${MES_S[m]}</th>`).join('')+'<th>Total</th></tr></thead><tbody>';
+  rows.forEach(r=>{
+    h+=`<tr><td class="name" title="${r.cust}">${r.cust}</td>`;
+    months.forEach(m=>{const v=(cmAll[r.cust]?.[m])||0;const t=max>0?v/max:0;
+      const bg=v===0?'#f8fafc':`rgba(79,70,229,${0.12+t*0.78})`;const col=t>0.5?'#fff':'#0f172a';
+      h+=`<td class="cell" style="background:${bg};color:${col}">${v===0?'·':money(v)}</td>`;});
+    h+=`<td class="cell" style="background:#0b1736;color:#fff;font-weight:800">${money(r.total)}</td></tr>`;
+  });
+  h+='</tbody></table>';
+  $('#heatmap').innerHTML=h;
+}
+
+/* ===================== SEGMENTOS ===================== */
+function renderSegments(){
+  const rm=refMonth();
+  const cmAll={};RECORDS.filter(r=>selCust.has(r.cust)).forEach(r=>{(cmAll[r.cust]=cmAll[r.cust]||{})[r.m]=(cmAll[r.cust]?.[r.m]||0)+r.tot;});
+  const custs=Object.keys(cmAll);
+  const firstMonth=c=>Math.min(...Object.keys(cmAll[c]).map(Number));
+  const monthsOf=c=>Object.keys(cmAll[c]).map(Number).sort((a,b)=>a-b);
+  const seg={Activos:[],Nuevos:[],Recurrentes:[],Inactivos:[],Recuperados:[]};
+  custs.forEach(c=>{
+    const ms=monthsOf(c);const boughtRef=ms.includes(rm);const first=firstMonth(c);
+    const lastBefore=ms.filter(m=>m<rm);const last=ms.length?Math.max(...ms):0;
+    if(boughtRef)seg.Activos.push(c);
+    if(first===rm)seg.Nuevos.push(c);
+    if(ms.filter(m=>m<=rm).length>=3)seg.Recurrentes.push(c);
+    if(!boughtRef&&!ms.includes(rm-1)&&last<=rm-2&&last>0)seg.Inactivos.push(c);
+    if(boughtRef&&!ms.includes(rm-1)&&first!==rm&&ms.some(m=>m<rm-1))seg.Recuperados.push(c);
+  });
+  const meta=[
+    {k:'Activos',col:'#16a34a',d:`Compraron en ${MES[rm]}`},
+    {k:'Nuevos',col:'#0ea5e9',d:`Primera compra en ${MES[rm]}`},
+    {k:'Recurrentes',col:'#4f46e5',d:'Compraron en 3+ meses'},
+    {k:'Inactivos',col:'#dc2626',d:'Sin compra hace 2+ meses'},
+    {k:'Recuperados',col:'#f59e0b',d:'Volvieron tras una pausa'}
+  ];
+  $('#segs').innerHTML=meta.map(m=>`
+    <div class="seg" style="border-top-color:${m.col}">
+      <div class="n" style="color:${m.col}">${seg[m.k].length}</div>
+      <div class="t">${m.k}</div>
+      <div class="d">${m.d}</div>
+      <div class="who" title="${seg[m.k].join(', ')}">${seg[m.k].slice(0,3).join(', ')}${seg[m.k].length>3?' +'+(seg[m.k].length-3):''}</div>
+    </div>`).join('');
+  $('#seg-note').innerHTML=`Clasificación relativa al <b>mes de referencia (${MES[rm]})</b> sobre el histórico disponible (Ene–May). Un cliente puede contar en varios grupos (p. ej. Activo y Recurrente). Ajusta el filtro de mes para cambiar la referencia.`;
+}
+
+/* ===================== FORECAST ===================== */
+function forecast(){
+  // usa todos los meses con datos, filtro cliente
+  const series=monthSeriesAll();const vals=ALL_M.map(m=>series[m]);
+  const ytd=vals.reduce((a,b)=>a+b,0);
+  const avg=ytd/ALL_M.length;
+  const runrate=avg*12;                          // conservador: promedio Ene–May × 12
+  const last3=(vals[2]+vals[3]+vals[4])/3;        // promedio Mar–May
+  const recent=ytd+last3*REMAIN_MONTHS;           // tendencia reciente (headline)
+  const bestRecent=Math.max(vals[2],vals[3],vals[4]);
+  const optimista=ytd+bestRecent*REMAIN_MONTHS;   // mejor mes reciente sostenido
+  const early=(vals[0]+vals[1])/2;
+  const momentum=early>0?(last3-early)/early:0;    // crecimiento Mar–May vs Ene–Feb
+  const monthlyProj=last3;                         // nivel proyectado por mes (gráfico)
+  return {ytd,avg,runrate,last3,recent,bestRecent,optimista,early,momentum,monthlyProj,headline:recent,vals};
+}
+function renderForecast(){
+  const fc=forecast();
+  const months=[...ALL_M];
+  const ctx=$('#chart-forecast');if(charts.f)charts.f.destroy();
+  const real=fc.vals.concat(Array(7).fill(null));
+  const proj=Array(4).fill(null).concat([fc.vals[4]]).concat(Array(7).fill(fc.monthlyProj)); // conecta May con ritmo reciente
+  const labels=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  charts.f=new Chart(ctx,{data:{labels,datasets:[
+    {type:'bar',label:'Real',data:real,backgroundColor:'#4f46e5',borderRadius:5},
+    {type:'line',label:'Proyección (ritmo reciente)',data:proj,borderColor:C.amber,borderDash:[5,4],pointRadius:3,borderWidth:2.5,backgroundColor:'rgba(245,158,11,.1)',fill:true},
+    {type:'line',label:'Meta mensual',data:labels.map(()=>GOAL_M),borderColor:C.muted,borderDash:[3,3],pointRadius:0,borderWidth:1.5}
+  ]},options:baseOpts({scales:{y:{ticks:{callback:v=>'$'+(v/1000)+'k'}}},plugins:{legend:{display:true,position:'top'},tooltip:{callbacks:{label:c=>c.raw==null?'':c.dataset.label+': '+money(c.raw)}}}})});
+  const scen=[
+    {n:'Conservador',v:fc.runrate,d:`Run-rate promedio Ene–May (${money(fc.avg)}/mes)`},
+    {n:'Tendencia reciente',v:fc.recent,d:`Promedio Mar–May (${money(fc.last3)}/mes) sostenido`},
+    {n:'Optimista',v:fc.optimista,d:`Mejor mes reciente (${money(fc.bestRecent)}) sostenido`}
+  ];
+  $('#forecast-cards').innerHTML=scen.map(s=>{
+    const gap=s.v-GOAL_Y;const cp=s.v/GOAL_Y;
+    return `<div class="cmp-cell" style="margin-bottom:11px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><div class="l">${s.n}</div><div style="font-size:11px;color:#94a3b8">${s.d}</div></div>
+        <div style="text-align:right"><div class="v">${money(s.v)}</div>
+        <span class="pill ${gap>=0?'up':'down'}" style="margin-top:3px">${pct(cp)} de meta · ${gap>=0?'+':'−'}${money(Math.abs(gap))}</span></div>
+      </div></div>`;
+  }).join('')+`<div class="note">Meta anual: <b>${money(GOAL_Y)}</b>. Proyección = acumulado real (Ene–May) + ritmo proyectado × ${REMAIN_MONTHS} meses restantes. El escenario conservador asume el promedio del año; el reciente y el optimista reflejan el ritmo de los últimos meses.</div>`;
+}
+
+/* ===================== INSIGHTS ===================== */
+function renderInsights(){
+  const rows=clientStats().sort((a,b)=>b.total-a.total);const grand=sumBy(recs());
+  const series=monthSeriesAll();const rm=refMonth();
+  const {n80}=paretoData();
+  // mejor/peor mes
+  const me=[...selMonths].sort((a,b)=>a-b);
+  let best=me[0],worst=me[0];me.forEach(m=>{if(series[m]>series[best])best=m;if(series[m]<series[worst])worst=m;});
+  // mayor crecimiento / caida (refMonth vs prev)
+  const cmAll={};RECORDS.filter(r=>selCust.has(r.cust)).forEach(r=>{(cmAll[r.cust]=cmAll[r.cust]||{})[r.m]=(cmAll[r.cust]?.[r.m]||0)+r.tot;});
+  let topGrow=null,topDrop=null;
+  Object.keys(cmAll).forEach(c=>{const v=cmAll[c][rm]||0,p=cmAll[c][rm-1]||0;const d=v-p;
+    if(p>0||v>0){if(topGrow==null||d>topGrow.d)topGrow={c,d,v,p};if(topDrop==null||d<topDrop.d)topDrop={c,d,v,p};}});
+  // saldo pendiente total
+  const out=sumBy(recs(),'out');const outRows=rows.filter(r=>r.out>0).sort((a,b)=>b.out-a.out);
+  // tendencia
+  const fc=forecast();const trendUp=fc.momentum>=0;
+  const top=rows[0];
+  const cards=[
+    {em:'🏆',bg:'tag-pos',h:'Cliente que más aporta',b:`<b>${top.cust}</b> con <b>${money(top.total)}</b> (${pct(top.share)} de la facturación). Es el ancla del negocio.`},
+    {em:'🚀',bg:'tag-info',h:'Impulsa el crecimiento',b:topGrow&&topGrow.d>0?`<b>${topGrow.c}</b> sumó <b>+${money(topGrow.d)}</b> en ${MES[rm]} vs ${MES_S[rm-1]||'—'}.`:'Sin crecimiento destacado en el mes de referencia.'},
+    {em:'📊',bg:'tag-info',h:'Regla 80/20',b:`<b>${n80} clientes</b> concentran el ~80% de los ingresos. Proteger esta base es prioridad estratégica.`},
+    {em:'📈',bg:'tag-pos',h:'Mejor mes',b:`<b>${MES[best]}</b> fue el más fuerte con <b>${money(series[best])}</b>.`},
+    {em:'📉',bg:'tag-warn',h:'Mes más débil',b:`<b>${MES[worst]}</b> registró el menor volumen: <b>${money(series[worst])}</b>.`},
+    {em:trendUp?'🟢':'🔴',bg:trendUp?'tag-pos':'tag-neg',h:'Tendencia del negocio',b:`Momentum <b>${trendUp?'positivo':'negativo'}</b>: el promedio Mar–May es <b>${signPct(fc.momentum)}</b> vs Ene–Feb. Proyección de cierre ~<b>${money(fc.recent)}</b>.`},
+    {em:'⚠️',bg:'tag-neg',h:'Riesgo · cartera vencida',b:out>0?`<b>${money(out)}</b> en saldos pendientes${outRows[0]?`, concentrados en <b>${outRows[0].cust}</b> (${money(outRows[0].out)})`:''}. Requiere gestión de cobranza.`:'Sin saldos pendientes en el periodo. Excelente salud de cobranza.'},
+    {em:'💡',bg:'tag-info',h:'Oportunidad',b:topDrop&&topDrop.d<0?`<b>${topDrop.c}</b> cayó <b>${money(Math.abs(topDrop.d))}</b> en ${MES[rm]}: oportunidad de reactivación. Además, escalar a la meta agresiva ($250k/mes) exige <b>${money(Math.max(0,GOAL_A-series[rm]))}</b> adicionales.`:`Escalar hacia la meta agresiva ($250k/mes) requiere <b>${money(Math.max(0,GOAL_A-series[rm]))}</b> adicionales en ${MES[rm]}.`}
+  ];
+  $('#insights').innerHTML=cards.map(c=>`<div class="ins"><div class="em ${c.bg}">${c.em}</div><div><div class="h">${c.h}</div><div class="b">${c.b}</div></div></div>`).join('');
+}
+
+/* ===================== RENDER MAESTRO ===================== */
+function render(){
+  updateCustBtn();
+  renderKPIs();renderGoals();
+  renderMonthlyChart();renderCumChart();renderGrowthChart();renderComparator();
+  renderTopChart();renderDonut();renderTable();
+  renderPareto();renderHeatmap();renderSegments();renderForecast();renderInsights();
+}
+
+/* ===================== EVENTOS ===================== */
+$('#cust-btn').onclick=()=>$('#cust-panel').classList.toggle('open');
+document.addEventListener('click',e=>{if(!e.target.closest('.cust-box'))$('#cust-panel').classList.remove('open');});
+$('#cust-search').oninput=e=>buildCustList(e.target.value);
+$('#reset-btn').onclick=()=>{selMonths=new Set(ALL_M);selCust=new Set(ALL_CUST);cmpMonths=new Set([4,5]);buildMonthChips();buildCustList();render();};
+document.querySelectorAll('#exec-table thead th').forEach(th=>{th.onclick=()=>{const k=th.dataset.k;if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=(k==='cust')?1:-1;}renderTable();};});
+
+/* ===================== INIT ===================== */
+buildMonthChips();buildCustList();render();
+</script>
+</body>
+</html>
